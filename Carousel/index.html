@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>轮播图</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 广告样式 */
+    h1 {
+      text-align: center;
+      margin: 40px 0;
+      border-bottom: 1px solid #ccc;
+    }
+    h1 a {
+      text-decoration: none;
+    }
+
+    /* 轮播图样式 */
+    /* container限制轮播图范围 */
+    #container {
+      /* 宽高根据图片大小决定 */
+      width: 640px;
+      height: 320px;
+      border: 3px solid #333;
+      overflow: hidden;
+      position: relative;
+      margin: 0 auto;
+    }
+
+    /* list控制图片长度，并相对container定位 */
+    #list {
+      width: 4480px;
+      height: 320px;
+      position: absolute;
+      z-index: 1;
+    }
+    #list img {
+      float: left;
+    }
+
+    /* 相对container定位 */
+    #buttons {
+      position: absolute;
+      height: 10px;
+      width: 100px;
+      z-index: 2;
+      bottom: 20px;
+      left: 280px;
+    }
+    #buttons span {
+      cursor: pointer;
+      float: left;
+      border: 1px solid #fff;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #333;
+      margin-right: 5px;
+    }
+    #buttons .on {
+      background: orangered;
+    }
+    
+    /* 相对container定位 */
+    .arrow {
+      cursor: pointer;
+      display: none;
+      font-size: 36px;
+      font-weight: bold;
+      text-align: center;
+      width: 40px;
+      height: 40px;
+      line-height: 39px;
+      position: absolute;
+      z-index: 2;
+      top: 150px;
+      background-color: rgba(0, 0, 0, .3);
+      color: #fff;
+      text-decoration: none;
+    }
+    .arrow:hover {
+      background-color: rgba(0, 0, 0, .7);
+    }
+    #container:hover .arrow {
+      display: block;
+    }
+    #prev {
+      left: 20px;
+    }
+    #next {
+      right: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 广告 -->
+  <h1>
+    <a href="http://www.liangjunrong.com">飘飞的心灵</a>
+  </h1>
+  <!-- container为外部容器 -->
+  <div id="container">
+    <!-- list存放图片位置 -->
+    <div id="list" style="left:-640px">
+      <img src="img/5.jpg" alt="5" />
+      <img src="img/1.jpg" alt="1" />
+      <img src="img/2.jpg" alt="2" />
+      <img src="img/3.jpg" alt="3" />
+      <img src="img/4.jpg" alt="4" />
+      <img src="img/5.jpg" alt="5" />
+      <img src="img/1.jpg" alt="1" />
+    </div>
+
+    <!-- buttons存放小圆点 -->
+    <div id="buttons">
+      <span index="1" class="on"></span>
+      <span index="2"></span>
+      <span index="3"></span>
+      <span index="4"></span>
+      <span index="5"></span>
+    </div>
+
+    <!-- 左右箭头 -->
+    <a href="javascript:;" id="prev" class="arrow">&lt;</a>
+    <a href="javascript:;" id="next" class="arrow">&gt;</a>
+  </div>
+
+  <script>
+    window.onload = function () {
+      // 获取需要的Id
+      var container = document.getElementById('container');
+      var list = document.getElementById('list');
+      var buttons = document.getElementById('buttons').getElementsByTagName('span');
+      var prev = document.getElementById('prev');
+      var next = document.getElementById('next');
+      //根据index操作播放的第几张图
+      var index = 1;
+      //限制不停点击左右箭头导致页面卡住
+      var animated = false;
+      //自动切换
+      var timer;
+
+      //左右箭头切换方法
+      function animate(offset) {
+        animated = true;
+        //位移距离
+        var newLeft = parseInt(list.style.left) + offset;
+        //位移总时间
+        var time = 300;
+        //位移间隔时间
+        var interval = 5;
+        //每次位移量
+        var speed = offset / (time / interval);
+        //定义go方法
+        function go() {
+          if ((speed < 0 && parseInt(list.style.left) > newLeft) || (speed > 0 && parseInt(list.style.left) < newLeft)) {
+            list.style.left = parseInt(list.style.left) + speed + 'px';
+            setTimeout(go, interval);
+          } else {
+            animated = false;
+            list.style.left = newLeft + 'px';
+            if (newLeft > -640) {
+              list.style.left = -3200 + 'px';
+            }
+            if (newLeft < -3200) {
+              list.style.left = -640 + 'px';
+            }
+          }
+        }
+        //开始跳转
+        go();
+      }
+
+      //小圆点切换
+      function showButton() {
+        for (var i = 0; i < buttons.length; i++) {
+          if (buttons[i].className == 'on') {
+            buttons[i].className = '';
+            break;
+          }
+        }
+        buttons[index - 1].className = 'on';
+      }
+
+      //右箭头
+      next.onclick = function () {
+        //如果到了第五张，这时候重置index到第一张，即轮播
+        if (index == 5) {
+          index = 1;
+        } else {
+          index += 1;
+        }
+        //切换button的显示
+        showButton();
+        //当轮播切换完一张的时候，才给你继续切换
+        if (animated == false) {
+          animate(-640);
+        }
+      }
+
+      //左箭头
+      prev.onclick = function () {
+        if (index == 1) {
+          index = 5;
+        } else {
+          index -= 1;
+        }
+        showButton();
+        if (!animated) {
+          animate(640);
+        }
+      }
+
+      //点击小圆点
+      for (var i = 0; i < buttons.length; i++) {
+        buttons[i].onclick = function () {
+          if (this.className == 'on') {
+            return;
+          }
+          //getAttribute获取DOM自定义属性
+          var myIndex = parseInt(this.getAttribute('index'));
+          //设置偏移量
+          var offset = -640 * (myIndex - index);
+          animate(offset);
+          index = myIndex;
+          showButton();
+        }
+      }
+
+      //自动切换
+      function play() {
+        timer = setInterval(function () {
+          next.onclick();
+        }, 3000)
+      }
+
+      function stop() {
+        clearInterval(timer);
+      }
+      container.onmouseover = stop;
+      container.onmouseout = play;
+      play();
+
+    }
+  </script>
+</body>
+
+</html>
